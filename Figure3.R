@@ -9,16 +9,6 @@ data <- read_excel("~/Desktop/LPUVcompRnshort.xlsx")
 data$study <- factor(data$study, levels = unique(data$study))
 data$virus <- factor(data$virus, levels = rev(sort(unique(data$virus))))
 
-#####
-#data <- data %>%
-#  group_by(study) %>%
-#  mutate(
-#    label_position = ifelse(row_number() %% 2 == 0, -1.5, 2)
-#  ) %>%
-#  ungroup()
-# Move the specific point above
-#data$label_position[data$study == "This study" & data$virus == "phi6"] <- -1.5
-
 #wes anderson color palette
 
 library(wesanderson)
@@ -28,11 +18,6 @@ pLP <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
     shape = guide_legend(title = "LP-UV (254 nm)")
   )+
   geom_point(size = 3) +
-  #geom_text(
-    #aes(label = study, vjust = label_position),
-    #size = 3,
-    #show.legend = FALSE
-  #) +
   scale_color_manual(
     values = c(
       "Bae & Shin (2016)" = wes_palette("GrandBudapest1")[4],
@@ -84,28 +69,6 @@ pLP <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
       "Ye et al. (2018)" = 8,
       "This study" = 18
     )
-    #labels = c(
-      #"Bae & Shin (2016)",
-      #"Battigelli et al. (1993)",
-      #"Calgua et al. (2014)", 
-      #"Chang et al. (1985)",
-      #"de Roda Husman et al. (2004)", 
-      #"Gerba et al. (2002)",
-      #"Harris et al. (1987)",
-      #expression("Kim et al. (2017) [" ~ "\u00D7" ~ 10^2 ~ "]"),
-      #"Maier et al. (1995)",
-      #"Meng & Gerba (1995)",
-      #"Nuanualsuwan et al. (2002)",
-      #"Oguma et al. (2016)",
-      #"Park et al. (2011)",
-      #"Rattanakul & Oguma (2018)",
-      #"Shin et al. (2005)", 
-      #"Sholtes et al. (2016)",
-      #"Simonet & Gantzer (2006)", 
-      #"Thurston-Enriquez et al. (2003)",
-      #"Ye et al. (2018)",
-      #"This study"
-    #)
   ) +
   scale_x_continuous(
     breaks = seq(0, 0.45, by = 0.05)
@@ -124,9 +87,6 @@ pLP <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   )
 
 ggsave("LPUVcomp_plot.png", width = 12, height = 4.5, units = "in", dpi = 300)
-
-##"This study" = wes_palette("GrandBudapest2")[1]
-##"This study" = 18
 
 ##############################. 255. ################################################
 
@@ -149,11 +109,6 @@ p255 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
     shape = guide_legend(title = "LED-UV 255 nm")
   )+
   geom_point(size = 3) +
-  #geom_text(
-  #aes(label = study, vjust = label_position),
-  #size = 3,
-  #show.legend = FALSE
-  #) +
   scale_color_manual(
     values = c(
       "Aoyagi et al. (2011)" = wes_palette("Zissou1")[1],
@@ -206,11 +161,6 @@ p265 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
     shape = guide_legend(title = "LED-UV 265 nm")
   )+
   geom_point(size = 3) +
-  #geom_text(
-  #aes(label = study, vjust = label_position),
-  #size = 3,
-  #show.legend = FALSE
-  #) +
   scale_color_manual(
     values = c(
       "Beck et al. (2017) - 260 nm" = wes_palette("Darjeeling2")[2], 
@@ -263,17 +213,6 @@ data <- read_excel("~/Desktop/285nmcompRshort.xlsx")
 data$study <- factor(data$study, levels = unique(data$study))
 data$virus <- factor(data$virus, levels = rev(sort(unique(data$virus))))
 
-
-#####
-#data <- data %>%
-#  group_by(study) %>%
-#  mutate(
-#    label_position = ifelse(row_number() %% 2 == 0, -1.5, 2)
-#  ) %>%
-#  ungroup()
-# Move the specific point above
-#data$label_position[data$study == "This study" & data$virus == "phi6"] <- -1.5
-
 #wes anderson color palette
 #GrandBudapest1
 #GrandBudapest2
@@ -285,11 +224,6 @@ p285 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
     shape = guide_legend(title = "LED-UV 285 nm")
   )+
   geom_point(size = 3) +
-  #geom_text(
-  #aes(label = study, vjust = label_position),
-  #size = 3,
-  #show.legend = FALSE
-  #) +
   scale_color_manual(
     values = c(
       "Aoyagi et al. (2011) - 280 nm" = wes_palette("Zissou1")[1], 
@@ -369,4 +303,3 @@ combined_plot <- pLP / p255 / p265 / p285 +
   units = "in",
   dpi = 600
 )
-# pLP/ p255 /p265/ p285

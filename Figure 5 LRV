@@ -1,0 +1,148 @@
+library(ggplot2)
+library(wesanderson)
+library(dplyr)
+#install.packages("ggpattern")
+library(ggpattern)
+#------------------------------------------------------------------------------------------
+virus_names <- c("ADV", "ECV", "FCV", "MS2", "P22", "phi6", "Qbeta")
+UV_names <- c("LP-UV (254 nm)", "LED-UV (255 nm)", "LED-UV (265 nm)", "LED-UV (285 nm)")
+UV_colors <- wes_palette('Chevalier1', 4, type = "continuous")
+
+
+# Data
+LP_data   <- c(33.361, 9.93, 7.482, 22.993, 11.897, 40.647, 12.361)
+data_255  <- c(20.163, 4.851, 3.326, 10.545, 4.387, 17.833, 3.805)
+data_265  <- c(22.172, 5.697, 4.727, 15.777, 5.49, 23.147, 5.566)
+data_285  <- c(36.029, 14.183, 15.823, 58.875, 14.532, 52.412, 13.66)
+
+# Errors
+LP_error  <- c(2.939, 0.305, 0.309, 0.591, 0.352, 1.982, 0.498)
+error_255 <- c(0.813, 0.141, 0.111, 0.334, 0.115, 0.636, 0.072)
+error_265 <- c(2.385, 0.169, 0.153, 0.333, 0.099, 0.453, 0.22)
+error_285 <- c(2.953, 0.459, 0.627, 1.084, 0.423, 1.499, 0.588)
+
+#------------------------------------------------------------------------------------------
+# Create long-format data frame for ggplot
+df <- data.frame(
+  Virus = rep(virus_names, times = 4),
+  UV = rep(UV_names, each = length(virus_names)),
+  EEO = c(LP_data, data_255, data_265, data_285),
+  Error = c(LP_error, error_255, error_265, error_285)
+)
+
+#------------------------------------------------------------------------------------------
+# Create grouping variable for faceting
+df$Group <- ifelse(df$Virus %in% c("ADV", "MS2", "phi6"),
+                   "ADV, MS2, phi6",
+                   "ECV, FCV, P22, Qbeta")
+
+#------------------------------------------------------------------------------------------
+UV_pattern_map <- c(
+  "LP-UV (254 nm)"  = "none",
+  "LED-UV (255 nm)" = "circle",
+  "LED-UV (265 nm)" = "stripe",
+  "LED-UV (285 nm)" = "crosshatch"
+)
+UV_color_map <- setNames(UV_colors, UV_names)
+df$UV <- factor(df$UV, levels = UV_names)
+
+ggplot(df, aes(x = Virus, y = EEO, fill = UV, pattern = UV)) +
+  geom_col_pattern(
+    position = position_dodge(width = 0.9),
+    pattern_fill = "grey50",
+    pattern_colour = "grey50",
+    pattern_density = 0.1,
+    pattern_spacing = 0.05
+  ) +
+  geom_errorbar(aes(ymin = EEO - Error,
+                    ymax = EEO + Error),
+                width = 0.2,
+                position = position_dodge(width = 0.9)) +
+  #geom_hline(yintercept = 20, color = "#036C99", linewidth = 1) +
+  #geom_hline(yintercept = 16, color = "#A52B28", linetype = "dashed", linewidth = 1) +
+  scale_fill_manual(values = UV_color_map) +
+  scale_pattern_manual(values = UV_pattern_map) +
+  labs(x = "Viruses",
+       y = "Required fluence (mJ/cm²) for 1 LRV") +
+  ylim(0, 100) +
+  facet_grid(. ~ Group, scales = "free_x", space = "free") +
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold")
+  )
+ggsave("Figure 5a 1LRV.png", device = "png", dpi = 300, 
+       width = 8, height = 4, units = "in")
+
+######################### 6 LRV ###################################################
+virus_names <- c("ADV", "ECV", "FCV", "MS2", "P22", "phi6", "Qbeta")
+UV_names <- c("LP-UV (254 nm)", "LED-UV (255 nm)", "LED-UV (265 nm)", "LED-UV (285 nm)")
+UV_colors <- wes_palette('Chevalier1', 4, type = "continuous")
+
+
+# Data
+LP_data   <- c(200.163, 59.581, 44.89, 139.961, 71.38, 243.883, 74.167)
+data_255  <- c(120.976, 29.106, 19.956, 63.272, 126.324, 106.999, 22.833)
+data_265  <- c(133.03, 34.18, 28.364, 95.663, 32.939, 138.883, 33.398)
+data_285  <- c(216.177, 85.097, 94.94, 353.249, 87.191, 314.471, 81.961)
+
+# Errors
+LP_error  <- c(17.631, 1.831, 1.857, 3.546, 2.111, 11.897, 2.988)
+error_255 <- c(4.878, 0.847, 0.664, 2.002, 0.693, 3.816, 0.434)
+error_265 <- c(14.308, 1.014, 0.92, 1.999, 0.595, 2.715, 1.319)
+error_285 <- c(17.719, 2.756, 3.764, 6.505, 2.539, 8.993, 3.528)
+
+#------------------------------------------------------------------------------------------
+# Create long-format data frame for ggplot
+df <- data.frame(
+  Virus = rep(virus_names, times = 4),
+  UV = rep(UV_names, each = length(virus_names)),
+  EEO = c(LP_data, data_255, data_265, data_285),
+  Error = c(LP_error, error_255, error_265, error_285)
+)
+
+#------------------------------------------------------------------------------------------
+# Create grouping variable for faceting
+df$Group <- ifelse(df$Virus %in% c("ADV", "MS2", "phi6"),
+                   "ADV, MS2, phi6",
+                   "ECV, FCV, P22, Qbeta")
+
+#------------------------------------------------------------------------------------------
+UV_pattern_map <- c(
+  "LP-UV (254 nm)"  = "none",
+  "LED-UV (255 nm)" = "circle",
+  "LED-UV (265 nm)" = "stripe",
+  "LED-UV (285 nm)" = "crosshatch"
+)
+UV_color_map <- setNames(UV_colors, UV_names)
+df$UV <- factor(df$UV, levels = UV_names)
+
+ggplot(df, aes(x = Virus, y = EEO, fill = UV, pattern = UV)) +
+  geom_col_pattern(
+    position = position_dodge(width = 0.9),
+    pattern_fill = "grey50",
+    pattern_colour = "grey50",
+    pattern_density = 0.1,
+    pattern_spacing = 0.05
+  ) +
+  geom_errorbar(aes(ymin = EEO - Error,
+                    ymax = EEO + Error),
+                width = 0.2,
+                position = position_dodge(width = 0.9)) +
+  #geom_hline(yintercept = 20, color = "#036C99", linewidth = 1) +
+  #geom_hline(yintercept = 16, color = "#A52B28", linetype = "dashed", linewidth = 1) +
+  scale_fill_manual(values = UV_color_map) +
+  scale_pattern_manual(values = UV_pattern_map) +
+  labs(x = "Viruses",
+       y = "Required fluence (mJ/cm²) for 6 LRV") +
+  ylim(0, 360) +
+  facet_grid(. ~ Group, scales = "free_x", space = "free") +
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold")
+  )
+ggsave("Figure 5b 6LRV.png", device = "png", dpi = 300, 
+       width = 8, height = 4, units = "in")

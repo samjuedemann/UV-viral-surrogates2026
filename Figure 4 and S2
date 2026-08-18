@@ -1,0 +1,79 @@
+library(seqinr)
+library(tidyverse)
+library(car)
+library(wesanderson)
+
+pydims <- c("(?=ct)","(?=tt)","(?=tc)") ## cDNA; Excluding "CC" per Rockey et al. citation: 
+#Douki, T.; Cadet, J. Individual Determination of the Yield of the Main UV-Induced 
+#Dimeric Pyrimidine Photoproducts in DNA Suggests a High Mutagenicity of CC 
+#Photolesions. Biochemistry 2001, 40 (8), 2495–2501. https://doi.org/10.1021/bi0022543.
+
+E12.fasta <- read.fasta("~/Desktop/GCA_008766575.1_ASM876657v1_genomic.fna") # Submitted GenBank assembly
+E12.seq <- E12.fasta$X79047.1 %>% paste(collapse = "")
+E12.pydims <- str_count(E12.seq, pattern = pydims) %>% sum
+
+FCV.fasta <- read.fasta("~/Desktop/GCF_000853345.1_ViralProj14877_genomic.fna") # NCBI refseq assembly
+FCV.seq <- FCV.fasta$NC_001481.2 %>% paste(collapse = "")
+FCV.pydims <- str_count(FCV.seq, pattern = pydims) %>% sum
+
+MS2.fasta <- read.fasta("~/Desktop/GCF_000847485.1_ViralProj14659_genomic.fna") # NCBI refseq assembly
+MS2.seq <- MS2.fasta$NC_001417.2 %>% paste(collapse = "")
+MS2.pydims <- str_count(MS2.seq, pattern = pydims) %>% sum
+
+Qb.fasta <- read.fasta("~/Desktop/GCF_000866345.1_ViralProj15479_genomic.fna") # NCBI refseq assembly
+Qb.seq <- Qb.fasta$NC_001890.1 %>% paste(collapse = "")
+Qb.pydims <- str_count(Qb.seq, pattern = pydims) %>% sum
+
+pydim.key <- data.frame(virus = c("ECV", "FCV", "MS2", "Qbeta"), 
+                        PyDimers = c(E12.pydims, FCV.pydims, MS2.pydims, Qb.pydims))
+
+#inactivation <- read_csv("inactivation rates raw data.csv") %>% 
+inactivation <- read_excel("~/Desktop/inactivation rates raw data new.xlsx") %>%
+  filter(virus %in% c("ECV", "FCV", "MS2", "Qbeta")) %>% 
+  pivot_longer(cols = c("trial 1", "trial 2", "trial 3"), 
+               names_to = "trial", values_to = "k_CW")
+
+model.df <- inactivation %>% left_join(pydim.key, by = "virus")
+
+#windows()
+quartz()
+par(mfrow = c(2,2))
+
+lm.1 <- model.df %>% lm(k_CW ~ PyDimers*UV, data = .)
+plot(lm.1)
+
+summary(lm.1)
+
+car::Anova(lm.1, type = "III") # Use type III to identify significant variables, 
+# b/c interaction is assumed (e.g., UV285 depends less on dimers)
+
+lm.2 <- model.df %>% lm(k_CW ~ PyDimers+PyDimers:UV, data = .)
+#windows()
+quartz()
+par(mfrow = c(2,2))
+plot(lm.2)
+
+summary(lm.2)
+
+car::Anova(lm.2, type = "III") # Use type III to identify significant variables, 
+# b/c interaction is assumed (e.g., UV285 depends less on dimers)
+
+model.df$Treatment <- factor(model.df$UV, 
+                             levels = c("LP-UV", "LED-UV 255 nm", 
+                                        "LED-UV 265 nm", "LED-UV 285 nm"), 
+                             labels = c("LP-UV (254 nm)", "LED-UV (255 nm)", 
+                                        "LED-UV (265 nm)", "LED-UV (285 nm)"))
+
+
+model.df %>% ggplot(aes(x = PyDimers, y = k_CW, color = Treatment, 
+                        linetype = Treatment, shape = Treatment)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = F) + 
+  scale_color_manual(values = wes_palette(n = 5, "Cavalcanti1")[c(1,2,4,5)]) + 
+  theme_bw() + 
+  labs(y = expression("Inactivation rate (cm"^2*"/mJ)"), 
+       x = "Number of adjacent pyrimidine pairs", 
+       color = "Treatment", linetype = "Treatment")
+
+ggsave("Figure 2.tiff", device = "tiff", dpi = 300, 
+       width = 6, height = 4, units = "in")

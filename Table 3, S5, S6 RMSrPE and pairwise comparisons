@@ -1,0 +1,81 @@
+df <- read_excel("~/Desktop/UVslope_dataset_updated.xlsx")
+library(readxl)
+library(writexl)
+library(dplyr)
+library(tibble)
+#library(tidyr)
+#library(dplyr)
+
+df_long <- df %>%
+pivot_longer(cols = 3:5, names_to = "Measurement", values_to = "Value")
+anova_result <- aov(Value ~ Virus, data = df_long)
+summary(anova_result)
+
+anova_result <- aov(Value ~ Virus * Disinfection, data = df_long)
+summary(anova_result)
+
+tukey_result <- TukeyHSD(anova_result)
+
+tukey_df <- bind_rows(
+  lapply(names(tukey_result), function(x) {
+    
+    as.data.frame(tukey_result[[x]]) %>%
+      rownames_to_column("Comparison") %>%
+      mutate(Factor = x, .before = 1)
+    
+  })
+) %>%
+  rename(
+    Difference = diff,
+    Lower_CI = lwr,
+    Upper_CI = upr,
+    Adjusted_p_value = `p adj`
+  )
+
+write_xlsx(
+  tukey_df,
+  path = "~/Desktop/Tukey_results.xlsx"
+)
+
+####################### Function to calculate RMSrPE ##########################
+rmsrpe <- function(observed, predicted) {
+  sqrt(mean(((observed - predicted) / observed)^2, na.rm = TRUE))
+}
+
+# Initialize result storage
+results <- data.frame(
+  Observed_ID = character(),
+  Observed_Category = character(),
+  Predicted_ID = character(),
+  Predicted_Category = character(),
+  RMSrPE = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Loop over row pairs (excluding self-comparisons)
+for (i in 1:nrow(df)) {
+  for (j in 1:nrow(df)) {
+    if (i != j) {
+      obs <- as.numeric(df[i, 3:5])
+      pred <- as.numeric(df[j, 3:5])
+      if (all(obs != 0, na.rm = TRUE)) {
+        err <- rmsrpe(obs, pred)
+        results <- rbind(results, data.frame(
+          Observed_ID = df[i, 1],
+          Observed_Category = df[i, 2],
+          Predicted_ID = df[j, 1],
+          Predicted_Category = df[j, 2],
+          RMSrPE = err
+        ))
+      }
+    }
+  }
+}
+
+# View results
+print(results)
+
+# Optional: sorted output
+results_sorted <- results[order(results$RMSrPE), ]
+print(results_sorted)
+write_xlsx(as.data.frame(results_sorted), path = "~/Desktop/RMSrPEnew.xlsx")

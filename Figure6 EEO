@@ -1,0 +1,91 @@
+library(ggplot2)
+library(wesanderson)
+library(dplyr)
+library(ggpattern)
+
+#------------------------------------------------------------------------------------------
+virus_names <- c("ADV", "ECV", "FCV", "P22", "MS2", "Phi6", "QBeta")
+UV_names <- c("LP-UV (254 nm)", "LED-UV (255 nm)", "LED-UV (265 nm)", "LED-UV (285 nm)")
+UV_colors <- wes_palette('Chevalier1', 4, type = "continuous")
+
+# Data
+LP_data   <- c(0.0818, 0.0243, 0.0183, 0.563, 0.0292, 0.0996, 0.0303)
+data_255  <- c(5.386, 1.296, 0.888, 2.817, 1.172, 4.763, 1.016)
+data_265  <- c(2.538, 0.652, 0.541, 1.806, 0.628, 2.650, 0.637)
+data_285  <- c(1.804, 0.710, 0.792, 2.949, 0.728, 2.625, 0.684)
+
+# Errors
+LP_error  <- c(0.00789668, 0.00077172, 0.00079108, 0.00148635, 0.00088840, 0.00510835, 0.00127172)
+error_255 <- c(0.22630608, 0.036884527, 0.03056626, 0.09202210, 0.03168334, 0.17617797, 0.01971605)
+error_265 <- c(0.30589937, 0.01992899, 0.01813903, 0.03895461, 0.01155225, 0.05284261, 0.02619957)
+error_285 <- c(0.16110773, 0.0237787, 0.03271918, 0.05531383, 0.02182704, 0.07727763, 0.03077751)
+
+# Create long-format data frame for ggplot
+df <- data.frame(
+  Virus = rep(virus_names, times = 4),
+  UV = rep(UV_names, each = length(virus_names)),
+  EEO = c(LP_data, data_255, data_265, data_285),
+  Error = c(LP_error, error_255, error_265, error_285)
+)
+
+# Set UV order so LP-UV is first
+df$UV <- factor(
+  df$UV,
+  levels = c(
+    "LP-UV (254 nm)",
+    "LED-UV (255 nm)",
+    "LED-UV (265 nm)",
+    "LED-UV (285 nm)"
+  )
+)
+
+# Create grouping variable for faceting
+df$Group <- ifelse(
+  df$Virus %in% c("ADV", "MS2", "phi6"),
+  "ADV, MS2, phi6",
+  "ECV, FCV, P22, Qbeta"
+)
+
+# Colors
+UV_colors <- wes_palette("Chevalier1", 4, type = "discrete")
+
+# Patterns
+UV_pattern_map <- c(
+  "LP-UV (254 nm)"  = "none",
+  "LED-UV (255 nm)" = "circle",
+  "LED-UV (265 nm)" = "stripe",
+  "LED-UV (285 nm)" = "crosshatch"
+)
+
+ggplot(df, aes(x = Virus, y = EEO, fill = UV, pattern = UV)) +
+  geom_col_pattern(
+    position = position_dodge(width = 0.9),
+    pattern_fill = "grey50",
+    pattern_colour = "grey50",
+    pattern_density = 0.1,
+    pattern_spacing = 0.05
+  ) +
+  geom_errorbar(
+    aes(
+      ymin = EEO - Error,
+      ymax = EEO + Error
+    ),
+    width = 0.2,
+    position = position_dodge(width = 0.9)
+  ) +
+  scale_fill_manual(values = UV_colors) +
+  scale_pattern_manual(values = UV_pattern_map) +
+  labs(
+    x = "Viruses",
+    y = expression(EEO~(kWh/cm^3))
+  ) +
+  ylim(0, 6) +
+  facet_grid(. ~ Group, scales = "free_x", space = "free") +
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold")
+  )
+ggsave("Figure6EEO.png", device = "png", dpi = 300, 
+       width = 8, height = 4, units = "in")

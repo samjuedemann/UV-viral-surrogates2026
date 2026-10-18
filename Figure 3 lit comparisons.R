@@ -105,8 +105,8 @@ library(wesanderson)
 
 p255 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   guides(
-    color = guide_legend(title = "LED-UV 255 nm"),
-    shape = guide_legend(title = "LED-UV 255 nm")
+    color = guide_legend(title = "UV-LED 255 nm"),
+    shape = guide_legend(title = "UV-LED 255 nm")
   )+
   geom_point(size = 3) +
   scale_color_manual(
@@ -157,8 +157,8 @@ library(wesanderson)
 
 p265 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   guides(
-    color = guide_legend(title = "LED-UV 265 nm"),
-    shape = guide_legend(title = "LED-UV 265 nm")
+    color = guide_legend(title = "UV-LED 265 nm"),
+    shape = guide_legend(title = "UV-LED 265 nm")
   )+
   geom_point(size = 3) +
   scale_color_manual(
@@ -220,8 +220,8 @@ library(wesanderson)
 
 p285 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   guides(
-    color = guide_legend(title = "LED-UV 285 nm"),
-    shape = guide_legend(title = "LED-UV 285 nm")
+    color = guide_legend(title = "UV-LED 285 nm"),
+    shape = guide_legend(title = "UV-LED 285 nm")
   )+
   geom_point(size = 3) +
   scale_color_manual(

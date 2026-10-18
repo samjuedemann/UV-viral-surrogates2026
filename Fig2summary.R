@@ -5,9 +5,9 @@ library(patchwork)
 
 files <- list(
   list(file = "./fig2_data/LP_254.xlsx",  title = "a) LP-UV (254 nm)"),
-  list(file = "./fig2_data/LED_255.xlsx", title = "b) LED-UV (255 nm)"),
-  list(file = "./fig2_data/LED_265.xlsx", title = "c) LED-UV (265 nm)"),
-  list(file = "./fig2_data/LED_285.xlsx", title = "d) LED-UV (285 nm)")
+  list(file = "./fig2_data/LED_255.xlsx", title = "b) UV-LED (255 nm)"),
+  list(file = "./fig2_data/LED_265.xlsx", title = "c) UV-LED (265 nm)"),
+  list(file = "./fig2_data/LED_285.xlsx", title = "d) UV-LED (285 nm)")
 )
 
 palette_col <- c(wes_palette("Royal1")[2], wes_palette("Chevalier1")[2], 
@@ -74,9 +74,10 @@ process_and_plot <- function(data, title, show_xlab = TRUE, show_ylab = TRUE) {
     ) +
     
     # Same x and y limits
-    scale_x_continuous(expand = expansion(mult = c(0, 0.03))) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0))) +
     scale_y_continuous(expand = expansion(mult = c(0, 0))) +
-    coord_cartesian(ylim = c(0, 8)) +
+    coord_cartesian(xlim = c(0, max(data$fluence, na.rm = TRUE) + 5),
+                    ylim = c(0, 8)) +
     
     # Labels
     labs(

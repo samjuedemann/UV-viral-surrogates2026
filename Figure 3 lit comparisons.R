@@ -128,7 +128,7 @@ p255 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   ) +
   theme_bw() +
   labs(
-    title = "b) LED-UV (255 nm)",
+    title = "b) UV-LED (255 nm)",
     y = "",
     x = "First-order inactivation rate constants (cm²/mJ)",
     color = "Study"
@@ -192,7 +192,7 @@ p265 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   ) +
   theme_bw() +
   labs(
-    title = "c) LED-UV (265 nm)",
+    title = "c) UV-LED (265 nm)",
     y = "",
     x = "First-order inactivation rate constants (cm²/mJ)",
     color = "Study"
@@ -257,7 +257,7 @@ p285 <- ggplot(data, aes(x = rate, y = virus, color = study, shape = study)) +
   ) +
   theme_bw() +
   labs(
-    title = "d) LED-UV (285 nm)",
+    title = "d) UV-LED (285 nm)",
     y = "",
     x = "First-order inactivation rate constants (cm²/mJ)",
     color = "Study"
@@ -296,7 +296,7 @@ combined_plot <- pLP / p255 / p265 / p285 +
   plot_layout(heights = c(1, 1, 1, 1))
 
  ggsave(
-  "UV_plots.png",
+  "Fig3.png",
   combined_plot,
   width = 8,
   height = 10,

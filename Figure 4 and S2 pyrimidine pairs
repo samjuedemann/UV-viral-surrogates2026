@@ -55,14 +55,17 @@ plot(lm.2)
 
 summary(lm.2)
 
+ggsave("Figure4.tiff", device = "tiff", dpi = 300, 
+       width = 6, height = 4, units = "in")
+
 car::Anova(lm.2, type = "III") # Use type III to identify significant variables, 
 # b/c interaction is assumed (e.g., UV285 depends less on dimers)
 
 model.df$Treatment <- factor(model.df$UV, 
-                             levels = c("LP-UV", "LED-UV 255 nm", 
-                                        "LED-UV 265 nm", "LED-UV 285 nm"), 
-                             labels = c("LP-UV (254 nm)", "LED-UV (255 nm)", 
-                                        "LED-UV (265 nm)", "LED-UV (285 nm)"))
+                             levels = c("LP-UV", "UV-LED 255 nm", 
+                                        "UV-LED 265 nm", "UV-LED 285 nm"), 
+                             labels = c("LP-UV (254 nm)", "UV-LED (255 nm)", 
+                                        "UV-LED (265 nm)", "UV-LED (285 nm)"))
 
 
 model.df %>% ggplot(aes(x = PyDimers, y = k_CW, color = Treatment, 
